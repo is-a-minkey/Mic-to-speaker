@@ -207,7 +207,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
       // 4. Auto-start transmission immediately on launch
       await _startTransmission();
     } catch (e) {
-      setState(() => _statusMessage = 'Init error: $e');
+      setState(() => _statusMessage = 'Init error: \$e');
     }
   }
 
@@ -262,7 +262,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
       _pulseController.repeat(reverse: true);
       _waveController.repeat();
     } catch (e) {
-      setState(() => _statusMessage = 'Stream error: $e');
+      setState(() => _statusMessage = 'Stream error: \$e');
     }
   }
 
@@ -654,7 +654,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
           ),
           const SizedBox(height: 4),
           Text(
-            'OUTPUT VOLUME  ·  ${(_volume * 100).round()}%',
+            'OUTPUT VOLUME  ·  \${(_volume * 100).round()}%',
             style: TextStyle(
               fontSize: 9,
               letterSpacing: 2,
