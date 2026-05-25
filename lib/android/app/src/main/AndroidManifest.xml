@@ -1,1 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AndroidManifest.xml — Megaphone
+  Place this file at:  android/app/src/main/AndroidManifest.xml
+  (replaces the Flutter-generated default)
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- ═══════════════════════════════════════════════════
+         PERMISSIONS
+         ═══════════════════════════════════════════════════ -->
+
+    <!-- Required: capture audio from the built-in microphone -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Required: route audio to speaker / BT headset while active -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Required: keep audio running when screen is locked -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Bluetooth audio output (optional but recommended) -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Internet permission needed by flutter_sound for FFmpeg codecs (no network traffic is made by the app itself) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- ═══════════════════════════════════════════════════
+         HARDWARE FEATURES
+         ═══════════════════════════════════════════════════ -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="true" />
+
+    <!-- ═══════════════════════════════════════════════════
+         APPLICATION
+         ═══════════════════════════════════════════════════ -->
+    <application
+        android:label="Megaphone"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="false"
+        android:hardwareAccelerated="true">
+
+        <!-- Main Flutter activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- Main launcher intent -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Flutter deeplinking support -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+        </activity>
+
+        <!-- ── Flutter Sound foreground service ──────────────
+             Keeps the audio pipeline alive when the screen is
+             locked or the app is moved to the background.      -->
+        <service
+            android:name="com.dooboolab.fluttersound.BackgroundAudioService"
+            android:exported="false"
+            android:foregroundServiceType="microphone"
+            android:stopWithTask="false" />
+
+        <!-- Flutter engine provider (required by Flutter embedding v2) -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+    </application>
+
+</manifest>
