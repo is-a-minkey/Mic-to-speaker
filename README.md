@@ -42,6 +42,12 @@ FlutterSoundRecorder ──► StreamController<Food> (broadcast)
 # Create a new Flutter project
 flutter create megaphone --org com.example --platforms android,ios
 cd megaphone
+
+# Replace generated files with the source files provided:
+#   lib/main.dart              → lib/main.dart
+#   pubspec.yaml               → pubspec.yaml
+#   android/app/src/main/AndroidManifest.xml  (replace)
+#   ios/Runner/Info.plist      (replace)
 ```
 
 ---
