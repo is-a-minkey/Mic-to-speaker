@@ -5,24 +5,22 @@ publish_to: none
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  flutter: ">=3.22.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # ── Audio engine ──────────────────────────────────────────
-  # flutter_sound: PCM-16 streaming recorder + player with AEC support.
-  # Docs: https://tau.canardoux.xyz/flutter_sound
-  flutter_sound: ^9.15.10
+  # Audio engine — PCM-16 streaming with AEC
+  flutter_sound: 9.15.11
 
-  # ── Permissions ───────────────────────────────────────────
-  permission_handler: ^11.3.1
+  # Permissions
+  permission_handler: 11.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
