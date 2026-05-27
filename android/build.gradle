@@ -1,5 +1,3 @@
-// Top-level build file — configuration for all sub-projects/modules.
-// With the new Flutter Gradle plugin this file can stay minimal.
 allprojects {
     repositories {
         google()
