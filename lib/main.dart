@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,8 +68,8 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
 
-  StreamController<Uint8List>? _audioFeedController;
-  StreamSubscription<Uint8List>? _audioSubscription;
+  StreamController<List<int>>? _audioFeedController;
+  StreamSubscription<List<int>>? _audioSubscription;
 
   // ── State ─────────────────────────────────────────────────
   bool _isInitialized = false;
@@ -213,7 +212,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
 
     try {
       // Create the inter-component stream
-      _audioFeedController = StreamController<Uint8List>.broadcast();
+      _audioFeedController = StreamController<List<int>>.broadcast();
 
       // ── Player: consume PCM from stream ──────────────────
       await _player.startPlayerFromStream(
@@ -237,10 +236,10 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
 
       // ── Wire them together ────────────────────────────────
       _audioSubscription =
-          _audioFeedController!.stream.listen((Uint8List buffer) {
+          _audioFeedController!.stream.listen((List<int> buffer) {
         if (!_isMuted) {
           // Feed PCM bytes directly to the player
-          _player.feedUint8FromStream(buffer);
+          _player.feedUint8FromStream(Uint8List.fromList(buffer));
         }
       });
 
@@ -682,7 +681,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
 /// Holds per-bar animation state for the waveform visualiser.
 class _BarData {
   final double phase;
-  double height = 0.15;
+  double height;
 
-  _BarData({required this.phase});
+  _BarData({required this.phase, this.height = 0.15});
 }
