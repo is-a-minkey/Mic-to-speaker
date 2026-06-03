@@ -1,11 +1,12 @@
 // ═══════════════════════════════════════════════════════════
 //  MEGAPHONE — Real-Time Audio Passthrough App
 //  Flutter / Dart
-//  Packages: flutter_sound ^9.x, permission_handler ^11.x
+//  Packages: flutter_sound ^9.28.0, permission_handler ^11.x
 // ═══════════════════════════════════════════════════════════
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -68,8 +69,8 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
 
-  StreamController<Food>? _audioFeedController;
-  StreamSubscription<Food>? _audioSubscription;
+  StreamController<Uint8List>? _audioFeedController;
+  StreamSubscription<Uint8List>? _audioSubscription;
 
   // ── State ─────────────────────────────────────────────────
   bool _isInitialized = false;
@@ -98,8 +99,6 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
   // ── Constants ─────────────────────────────────────────────
   static const int _sampleRate = 44100;
   static const int _numChannels = 1;
-  // 4096 samples ≈ ~93 ms latency at 44.1 kHz; lower = less latency but more
-  // chance of glitches. 4096 is a safe default; try 2048 on modern devices.
   static const int _bufferSize = 4096;
 
   // ══════════════════════════════════════════════════════════
@@ -191,10 +190,6 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
       await _recorder.openRecorder();
       await _player.openPlayer();
 
-      // 3. (Android) Enable hardware Acoustic Echo Cancellation when available.
-      //    flutter_sound exposes this via AndroidAudioFlags on the recorder.
-      //    The flag below requests AEC from the platform audio HAL.
-      //    On iOS, AVC/AEC is automatically applied by AVAudioSession.
       await _recorder.setSubscriptionDuration(
         const Duration(milliseconds: 10),
       );
@@ -204,7 +199,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
         _statusMessage = 'Ready';
       });
 
-      // 4. Auto-start transmission immediately on launch
+      // 3. Auto-start transmission immediately on launch
       await _startTransmission();
     } catch (e) {
       setState(() => _statusMessage = 'Init error: $e');
@@ -217,15 +212,16 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
     if (!_isInitialized || _isActive) return;
 
     try {
-      // Create the inter-component stream (broadcast so multiple listeners OK)
-      _audioFeedController = StreamController<Food>.broadcast();
+      // Create the inter-component stream
+      _audioFeedController = StreamController<Uint8List>.broadcast();
 
       // ── Player: consume PCM from stream ──────────────────
       await _player.startPlayerFromStream(
         codec: Codec.pcm16,
         numChannels: _numChannels,
         sampleRate: _sampleRate,
-        // interleaved: true (default), bufferSize handled by recorder
+        bufferSize: _bufferSize,
+        interleaved: true,
       );
       await _player.setVolume(_volume);
 
@@ -236,20 +232,15 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
         numChannels: _numChannels,
         sampleRate: _sampleRate,
         bufferSize: _bufferSize,
-        // Android: request AEC + Noise Suppression at the platform level
         audioSource: AudioSource.microphone,
       );
 
       // ── Wire them together ────────────────────────────────
       _audioSubscription =
-          _audioFeedController!.stream.listen((Food food) {
-        if (food is FoodData && food.data != null) {
-          if (!_isMuted) {
-            // Feed raw PCM bytes directly to the player's ring-buffer.
-            // This is the core passthrough path; latency ≈ _bufferSize / sampleRate.
-            _player.feedFromStream(food.data!);
-          }
-          // When muted we still drain the recorder stream so it doesn't back-pressure.
+          _audioFeedController!.stream.listen((Uint8List buffer) {
+        if (!_isMuted) {
+          // Feed PCM bytes directly to the player
+          _player.feedUint8FromStream(buffer);
         }
       });
 
@@ -327,7 +318,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final btnRadius = size.width * 0.30; // 60 % of screen width diameter
+    final btnRadius = size.width * 0.30;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
@@ -691,7 +682,7 @@ class _MegaphoneScreenState extends State<MegaphoneScreen>
 /// Holds per-bar animation state for the waveform visualiser.
 class _BarData {
   final double phase;
-  double height;
+  double height = 0.15;
 
-  _BarData({required this.phase, this.height = 0.15});
+  _BarData({required this.phase});
 }
