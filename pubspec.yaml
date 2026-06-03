@@ -12,10 +12,10 @@ dependencies:
     sdk: flutter
 
   # Audio engine — PCM-16 streaming with AEC
-  flutter_sound: 9.15.11
+  flutter_sound: ^9.28.0
 
   # Permissions
-  permission_handler: 11.3.1
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
